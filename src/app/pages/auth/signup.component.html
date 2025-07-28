@@ -1,0 +1,243 @@
+<div class="signup-container">
+  <div class="signup-card">
+    <h1>FitSense</h1>
+    <h2>Create Account</h2>
+
+    <!-- Progress indicator -->
+    <div class="progress-container">
+      <div class="progress-bar">
+        <div class="progress" [style.width.%]="(currentStep / totalSteps) * 100"></div>
+      </div>
+      <div class="step-indicator">Step {{ currentStep }} of {{ totalSteps }}</div>
+    </div>
+
+    <!-- Error message -->
+    <div *ngIf="errorMessage" class="error-message">
+      {{ errorMessage }}
+    </div>
+
+    <!-- Step 1: Email & Password -->
+    <div *ngIf="currentStep === 1" class="step-content">
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          [(ngModel)]="signupData.email"
+          placeholder="Enter your email"
+          required>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input
+          type="password"
+          id="password"
+          name="password"
+          [(ngModel)]="signupData.password"
+          placeholder="Create a password (min. 6 characters)"
+          required>
+      </div>
+    </div>
+
+    <!-- Step 2: Gender Selection -->
+    <div *ngIf="currentStep === 2" class="step-content">
+      <h3>Select your gender</h3>
+
+      <div class="gender-options">
+        <div
+          class="gender-option"
+          [class.selected]="signupData.gender === 'Male'"
+          (click)="signupData.gender = 'Male'">
+          <div class="gender-icon">♂</div>
+          <div class="gender-label">Male</div>
+        </div>
+
+        <div
+          class="gender-option"
+          [class.selected]="signupData.gender === 'Female'"
+          (click)="signupData.gender = 'Female'">
+          <div class="gender-icon">♀</div>
+          <div class="gender-label">Female</div>
+        </div>
+
+        <div
+          class="gender-option"
+          [class.selected]="signupData.gender === 'Other'"
+          (click)="signupData.gender = 'Other'">
+          <div class="gender-icon">⚧</div>
+          <div class="gender-label">Other</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3: Age Input -->
+    <div *ngIf="currentStep === 3" class="step-content">
+      <h3>How old are you?</h3>
+
+      <div class="form-group">
+        <input
+          type="number"
+          id="age"
+          name="age"
+          [(ngModel)]="signupData.age"
+          min="16"
+          max="100"
+          placeholder="Enter your age"
+          required>
+      </div>
+    </div>
+
+    <!-- Step 4: Sports Selection -->
+    <div *ngIf="currentStep === 4" class="step-content">
+      <h3>What sports do you do?</h3>
+      <p class="subtitle">Select all that apply</p>
+
+      <div class="sports-options">
+        <div
+          *ngFor="let sport of availableSports"
+          class="sport-option"
+          [class.selected]="isSportSelected(sport)"
+          (click)="toggleSport(sport)">
+          {{ sport }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 5: Training Metrics -->
+    <div *ngIf="currentStep === 5" class="step-content">
+      <h3>Training Metrics</h3>
+
+      <div *ngIf="signupData.sports.includes('Cycling')" class="form-group">
+        <label for="ftp">Your FTP (Functional Threshold Power)</label>
+        <input
+          type="number"
+          id="ftp"
+          name="ftp"
+          [(ngModel)]="signupData.ftp"
+          placeholder="Enter your FTP in watts"
+          required>
+      </div>
+
+      <div *ngIf="signupData.sports.includes('Running')" class="form-group">
+        <label for="runningPace">Your Running Pace (min/km)</label>
+        <input
+          type="number"
+          id="runningPace"
+          name="runningPace"
+          [(ngModel)]="signupData.runningPace"
+          placeholder="Enter your pace in min/km"
+          step="0.1"
+          required>
+      </div>
+
+      <div *ngIf="signupData.sports.includes('Swimming')" class="form-group">
+        <label for="swimPace">Your Swimming Pace (min/100m)</label>
+        <input
+          type="number"
+          id="swimPace"
+          name="swimPace"
+          [(ngModel)]="signupData.swimPace"
+          placeholder="Enter your pace in min/100m"
+          step="0.1"
+          required>
+      </div>
+    </div>
+
+    <!-- Step 6: Plan Length -->
+    <div *ngIf="currentStep === 6" class="step-content">
+      <h3>Training Plan Length</h3>
+      <p class="subtitle">How many weeks would you like your training plan to be?</p>
+
+      <div class="plan-options">
+        <div
+          class="plan-option"
+          [class.selected]="signupData.planLength === 4"
+          (click)="signupData.planLength = 4">
+          4 weeks
+        </div>
+
+        <div
+          class="plan-option"
+          [class.selected]="signupData.planLength === 8"
+          (click)="signupData.planLength = 8">
+          8 weeks
+        </div>
+
+        <div
+          class="plan-option"
+          [class.selected]="signupData.planLength === 12"
+          (click)="signupData.planLength = 12">
+          12 weeks
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 7: Review -->
+    <div *ngIf="currentStep === 7" class="step-content">
+      <h3>Review Your Information</h3>
+
+      <div class="review-item">
+        <div class="review-label">Email:</div>
+        <div class="review-value">{{ signupData.email }}</div>
+      </div>
+
+      <div class="review-item">
+        <div class="review-label">Gender:</div>
+        <div class="review-value">{{ signupData.gender }}</div>
+      </div>
+
+      <div class="review-item">
+        <div class="review-label">Age:</div>
+        <div class="review-value">{{ signupData.age }}</div>
+      </div>
+
+      <div class="review-item">
+        <div class="review-label">Sports:</div>
+        <div class="review-value">{{ signupData.sports.join(', ') }}</div>
+      </div>
+
+      <div *ngIf="signupData.sports.includes('Cycling')" class="review-item">
+        <div class="review-label">FTP:</div>
+        <div class="review-value">{{ signupData.ftp }} watts</div>
+      </div>
+
+      <div *ngIf="signupData.sports.includes('Running')" class="review-item">
+        <div class="review-label">Running Pace:</div>
+        <div class="review-value">{{ signupData.runningPace }} min/km</div>
+      </div>
+
+      <div *ngIf="signupData.sports.includes('Swimming')" class="review-item">
+        <div class="review-label">Swimming Pace:</div>
+        <div class="review-value">{{ signupData.swimPace }} min/100m</div>
+      </div>
+
+      <div class="review-item">
+        <div class="review-label">Plan Length:</div>
+        <div class="review-value">{{ signupData.planLength }} weeks</div>
+      </div>
+    </div>
+
+    <!-- Navigation buttons -->
+    <div class="button-container">
+      <button
+        *ngIf="currentStep > 1"
+        class="secondary-button"
+        (click)="previousStep()">
+        Back
+      </button>
+
+      <button
+        class="primary-button"
+        (click)="nextStep()">
+        {{ currentStep < totalSteps ? 'Next' : 'Complete Signup' }}
+      </button>
+    </div>
+
+    <div class="login-link">
+      Already have an account?
+      <a (click)="goToLogin()">Log in</a>
+    </div>
+  </div>
+</div>

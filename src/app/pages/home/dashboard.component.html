@@ -1,0 +1,126 @@
+<div class="dashboard-container">
+  <!-- Header -->
+  <header class="dashboard-header">
+    <div class="user-greeting">
+      <h1>Hello, {{ userName }}!</h1>
+      <p class="date">{{ formatDate(todaysDate) }}</p>
+    </div>
+    <div class="header-actions">
+      <button class="icon-button" (click)="logout()">
+        <span class="material-icons">logout</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main content -->
+  <main class="dashboard-content">
+    <!-- Today's Training Section -->
+    <section class="section">
+      <h2 class="section-title">Today's Training</h2>
+
+      <div *ngIf="todaysWorkout" class="workout-card" (click)="viewWorkoutDetails(todaysWorkout.id)">
+        <div class="workout-info">
+          <div class="workout-type">{{ todaysWorkout.type }}</div>
+          <h3 class="workout-title">{{ todaysWorkout.title }}</h3>
+          <div class="workout-details">
+            <span class="workout-duration">
+              <span class="material-icons">schedule</span>
+              {{ todaysWorkout.duration }} min
+            </span>
+            <span *ngIf="todaysWorkout.scheduledTime" class="workout-time">
+              <span class="material-icons">access_time</span>
+              {{ todaysWorkout.scheduledTime }}
+            </span>
+          </div>
+        </div>
+        <button class="start-button" (click)="startWorkout(); $event.stopPropagation()">
+          <span class="material-icons">play_arrow</span>
+          Start
+        </button>
+      </div>
+
+      <div *ngIf="!todaysWorkout" class="empty-state">
+        <p>No workouts scheduled for today.</p>
+        <button class="primary-button" (click)="navigateTo('/workout/plans')">
+          View Training Plan
+        </button>
+      </div>
+    </section>
+
+    <!-- Quick Actions Section -->
+    <section class="section">
+      <h2 class="section-title">Quick Actions</h2>
+
+      <div class="quick-actions">
+        <div *ngFor="let action of quickActions" class="action-card" (click)="action.action()">
+          <span class="material-icons">{{ action.icon }}</span>
+          <span class="action-label">{{ action.label }}</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Metrics Section -->
+    <section class="section">
+      <h2 class="section-title">Your Metrics</h2>
+
+      <div class="metrics-grid">
+        <div *ngFor="let metric of metrics" class="metric-card">
+          <div class="metric-icon">
+            <span class="material-icons">{{ metric.icon }}</span>
+          </div>
+          <div class="metric-details">
+            <div class="metric-label">{{ metric.label }}</div>
+            <div class="metric-value">
+              {{ metric.value }}
+              <span *ngIf="metric.unit" class="metric-unit">{{ metric.unit }}</span>
+            </div>
+            <div *ngIf="metric.change !== undefined" class="metric-change"
+                [ngClass]="{'positive': metric.change > 0, 'negative': metric.change < 0}">
+              <span class="material-icons">
+                {{ metric.change > 0 ? 'arrow_upward' : 'arrow_downward' }}
+              </span>
+              {{ metric.change < 0 ? -metric.change : metric.change }}%
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Recent Activities Section -->
+    <section class="section" *ngIf="recentActivities.length > 0">
+      <h2 class="section-title">Recent Activities</h2>
+
+      <div class="activities-list">
+        <div *ngFor="let activity of recentActivities" class="activity-card"
+            (click)="viewActivityDetails(activity.id)">
+          <div class="activity-type">{{ activity.type }}</div>
+          <h3 class="activity-title">{{ activity.title }}</h3>
+          <div class="activity-duration">
+            <span class="material-icons">schedule</span>
+            {{ activity.duration }} min
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Navigation Footer -->
+  <nav class="bottom-nav">
+    <div class="nav-item active">
+      <span class="material-icons">home</span>
+      <span class="nav-label">Home</span>
+    </div>
+    <div class="nav-item" (click)="navigateTo('/workout/plans')">
+      <span class="material-icons">fitness_center</span>
+      <span class="nav-label">Workouts</span>
+    </div>
+    <div class="nav-item" (click)="navigateTo('/calendar')">
+      <span class="material-icons">calendar_today</span>
+      <span class="nav-label">Calendar</span>
+    </div>
+    <div class="nav-item" (click)="navigateTo('/more')">
+      <span class="material-icons">more_horiz</span>
+      <span class="nav-label">More</span>
+    </div>
+  </nav>
+</div>

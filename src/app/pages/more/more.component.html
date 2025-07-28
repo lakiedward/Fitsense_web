@@ -1,0 +1,68 @@
+<div class="more-container">
+  <!-- Header -->
+  <header class="more-header">
+    <h1>Settings</h1>
+  </header>
+
+  <!-- User Profile Section -->
+  <section class="user-profile-section">
+    <div class="user-avatar">
+      <div class="avatar-placeholder">
+        {{ userName.charAt(0) }}
+      </div>
+    </div>
+    <div class="user-info">
+      <h2 class="user-name">{{ userName }}</h2>
+      <p class="user-email">{{ userEmail }}</p>
+    </div>
+  </section>
+
+  <!-- Settings Sections -->
+  <main class="settings-content">
+    <div *ngFor="let section of settingsSections" class="settings-section">
+      <h3 class="section-title">{{ section.title }}</h3>
+
+      <div class="settings-items">
+        <div *ngFor="let item of section.items" class="settings-item"
+            [ngClass]="{'logout': item.title === 'Logout'}"
+            (click)="navigateTo(item.route, item.action)">
+          <div class="item-icon">
+            <span class="material-icons">{{ item.icon }}</span>
+          </div>
+          <div class="item-content">
+            <div class="item-title">{{ item.title }}</div>
+            <div class="item-description">{{ item.description }}</div>
+          </div>
+          <div class="item-arrow">
+            <span class="material-icons">chevron_right</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="app-info">
+      <p>FitSense v1.0.0</p>
+      <p>&copy; 2025 FitSense. All rights reserved.</p>
+    </div>
+  </main>
+
+  <!-- Navigation Footer -->
+  <nav class="bottom-nav">
+    <div class="nav-item" (click)="navigateTo('/home', undefined)">
+      <span class="material-icons">home</span>
+      <span class="nav-label">Home</span>
+    </div>
+    <div class="nav-item" (click)="navigateTo('/workout/plans', undefined)">
+      <span class="material-icons">fitness_center</span>
+      <span class="nav-label">Workouts</span>
+    </div>
+    <div class="nav-item" (click)="navigateTo('/calendar', undefined)">
+      <span class="material-icons">calendar_today</span>
+      <span class="nav-label">Calendar</span>
+    </div>
+    <div class="nav-item active">
+      <span class="material-icons">more_horiz</span>
+      <span class="nav-label">More</span>
+    </div>
+  </nav>
+</div>

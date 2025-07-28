@@ -1,0 +1,163 @@
+<div class="workout-execution-container">
+  <!-- Header -->
+  <header class="workout-header">
+    <button class="icon-button" (click)="navigateBack()">
+      <span class="material-icons">arrow_back</span>
+    </button>
+    <div *ngIf="workout" class="workout-title">
+      <h1>{{ workout.title }}</h1>
+      <div class="workout-sport">{{ workout.sport }}</div>
+    </div>
+  </header>
+
+  <!-- Main content -->
+  <main class="workout-content">
+    <!-- Workout not loaded state -->
+    <div *ngIf="!workout" class="loading-state">
+      <p>Loading workout...</p>
+    </div>
+
+    <!-- Workout loaded but not started state -->
+    <div *ngIf="workout && !isStarted" class="start-screen">
+      <div class="workout-info">
+        <h2>{{ workout.title }}</h2>
+        <p class="workout-description">{{ workout.description }}</p>
+        <div class="workout-duration">
+          <span class="material-icons">schedule</span>
+          {{ formatTime(workout.totalDuration) }}
+        </div>
+      </div>
+
+      <div class="steps-preview">
+        <h3>Workout Steps</h3>
+        <div class="steps-list">
+          <div *ngFor="let step of workout.steps; let i = index"
+              class="step-preview" [ngClass]="getStepTypeClass(step.type)">
+            <div class="step-number">{{ i + 1 }}</div>
+            <div class="step-details">
+              <div class="step-name">{{ step.name }}</div>
+              <div class="step-duration">{{ formatTime(step.duration) }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button class="start-button" (click)="startWorkout()">
+        <span class="material-icons">play_arrow</span>
+        Start Workout
+      </button>
+    </div>
+
+    <!-- Workout in progress state -->
+    <div *ngIf="workout && isStarted" class="workout-in-progress">
+      <!-- Progress bars -->
+      <div class="progress-section">
+        <div class="progress-container">
+          <div class="progress-label">
+            <span>Step Progress</span>
+            <span>{{ getStepTimeRemaining() }} remaining</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress" [style.width.%]="getStepProgress()"></div>
+          </div>
+        </div>
+
+        <div class="progress-container">
+          <div class="progress-label">
+            <span>Workout Progress</span>
+            <span>{{ getWorkoutTimeRemaining() }} remaining</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress" [style.width.%]="getWorkoutProgress()"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Current step -->
+      <div class="current-step-section">
+        <div class="current-step" *ngIf="getCurrentStep()" [ngClass]="getStepTypeClass(getCurrentStep()?.type || '')">
+          <div class="step-header">
+            <div class="step-type">{{ getCurrentStep()?.type }}</div>
+            <div class="step-time">{{ getStepTimeRemaining() }}</div>
+          </div>
+          <h2 class="step-name">{{ getCurrentStep()?.name }}</h2>
+          <p class="step-description">{{ getCurrentStep()?.description }}</p>
+
+          <div class="step-targets">
+            <div *ngIf="getCurrentStep()?.targetPower" class="target-metric">
+              <div class="target-label">Target Power</div>
+              <div class="target-value">{{ getCurrentStep()?.targetPower }} W</div>
+            </div>
+            <div *ngIf="getCurrentStep()?.targetHeartRate" class="target-metric">
+              <div class="target-label">Target HR</div>
+              <div class="target-value">{{ getCurrentStep()?.targetHeartRate }} bpm</div>
+            </div>
+            <div *ngIf="getCurrentStep()?.targetCadence" class="target-metric">
+              <div class="target-label">Target Cadence</div>
+              <div class="target-value">{{ getCurrentStep()?.targetCadence }} rpm</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Current metrics -->
+      <div class="metrics-section">
+        <div class="metric-card">
+          <div class="metric-label">Power</div>
+          <div class="metric-value">{{ currentPower }}</div>
+          <div class="metric-unit">watts</div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-label">Heart Rate</div>
+          <div class="metric-value">{{ currentHeartRate }}</div>
+          <div class="metric-unit">bpm</div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-label">Cadence</div>
+          <div class="metric-value">{{ currentCadence }}</div>
+          <div class="metric-unit">rpm</div>
+        </div>
+      </div>
+
+      <!-- Next steps preview -->
+      <div class="next-steps-section">
+        <h3>Coming Up</h3>
+        <div class="next-steps">
+          <div *ngFor="let step of workout.steps.slice(currentStepIndex + 1, currentStepIndex + 3); let i = index"
+              class="next-step" [ngClass]="getStepTypeClass(step.type)">
+            <div class="step-number">{{ currentStepIndex + i + 2 }}</div>
+            <div class="step-details">
+              <div class="step-name">{{ step.name }}</div>
+              <div class="step-duration">{{ formatTime(step.duration) }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Controls -->
+      <div class="controls-section">
+        <button *ngIf="!isPaused" class="control-button pause" (click)="pauseWorkout()">
+          <span class="material-icons">pause</span>
+          Pause
+        </button>
+
+        <button *ngIf="isPaused" class="control-button resume" (click)="resumeWorkout()">
+          <span class="material-icons">play_arrow</span>
+          Resume
+        </button>
+
+        <button class="control-button skip" (click)="skipStep()">
+          <span class="material-icons">skip_next</span>
+          Skip
+        </button>
+
+        <button class="control-button stop" (click)="stopWorkout()">
+          <span class="material-icons">stop</span>
+          End
+        </button>
+      </div>
+    </div>
+  </main>
+</div>

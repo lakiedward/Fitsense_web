@@ -1,0 +1,284 @@
+.signup-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #4a90e2, #63b3ed);
+  padding: 2rem;
+}
+
+.signup-card {
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 2rem;
+  width: 100%;
+  max-width: 500px;
+}
+
+h1 {
+  color: #4a90e2;
+  text-align: center;
+  margin-bottom: 0.5rem;
+  font-size: 2rem;
+}
+
+h2 {
+  color: #333;
+  text-align: center;
+  margin-bottom: 1.5rem;
+  font-weight: 500;
+}
+
+h3 {
+  color: #333;
+  margin-bottom: 1rem;
+  font-weight: 500;
+}
+
+.subtitle {
+  color: #666;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+}
+
+/* Progress bar */
+.progress-container {
+  margin-bottom: 1.5rem;
+}
+
+.progress-bar {
+  height: 6px;
+  background-color: #e2e8f0;
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+.progress {
+  height: 100%;
+  background-color: #4a90e2;
+  transition: width 0.3s ease;
+}
+
+.step-indicator {
+  text-align: right;
+  font-size: 0.8rem;
+  color: #666;
+}
+
+/* Form elements */
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #555;
+  font-weight: 500;
+}
+
+input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+  transition: border-color 0.3s;
+}
+
+input:focus {
+  outline: none;
+  border-color: #4a90e2;
+}
+
+/* Gender selection */
+.gender-options {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+.gender-option {
+  flex: 1;
+  margin: 0 0.5rem;
+  padding: 1rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.gender-option:first-child {
+  margin-left: 0;
+}
+
+.gender-option:last-child {
+  margin-right: 0;
+}
+
+.gender-option.selected {
+  border-color: #4a90e2;
+  background-color: rgba(74, 144, 226, 0.1);
+}
+
+.gender-icon {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.gender-label {
+  font-weight: 500;
+}
+
+/* Sports selection */
+.sports-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.sport-option {
+  padding: 0.75rem 1.25rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.sport-option.selected {
+  border-color: #4a90e2;
+  background-color: rgba(74, 144, 226, 0.1);
+}
+
+/* Plan options */
+.plan-options {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.plan-option {
+  padding: 1rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.plan-option.selected {
+  border-color: #4a90e2;
+  background-color: rgba(74, 144, 226, 0.1);
+}
+
+/* Review section */
+.review-item {
+  display: flex;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #eee;
+}
+
+.review-label {
+  font-weight: 500;
+  width: 40%;
+  color: #555;
+}
+
+.review-value {
+  width: 60%;
+}
+
+/* Buttons */
+.button-container {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 2rem;
+}
+
+.primary-button, .secondary-button {
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.primary-button {
+  background-color: #4a90e2;
+  color: white;
+  border: none;
+}
+
+.primary-button:hover {
+  background-color: #3182ce;
+}
+
+.secondary-button {
+  background-color: transparent;
+  color: #555;
+  border: 1px solid #ddd;
+}
+
+.secondary-button:hover {
+  background-color: #f7fafc;
+}
+
+/* When there's only one button (first step) */
+.button-container:has(.primary-button:only-child) {
+  justify-content: flex-end;
+}
+
+/* Error message */
+.error-message {
+  color: #e53e3e;
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+  padding: 0.5rem;
+  background-color: rgba(229, 62, 62, 0.1);
+  border-radius: 4px;
+}
+
+/* Login link */
+.login-link {
+  text-align: center;
+  margin-top: 1.5rem;
+  color: #555;
+}
+
+.login-link a {
+  color: #4a90e2;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.login-link a:hover {
+  text-decoration: underline;
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .gender-options {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .gender-option {
+    margin: 0;
+  }
+
+  .button-container {
+    flex-direction: column-reverse;
+    gap: 0.75rem;
+  }
+
+  .primary-button, .secondary-button {
+    width: 100%;
+  }
+}
