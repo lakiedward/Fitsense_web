@@ -4,13 +4,13 @@
     <h2>Login</h2>
 
     <div class="form-group">
-      <label for="email">Email</label>
+      <label for="username">Username</label>
       <input
-        type="email"
-        id="email"
-        name="email"
-        [(ngModel)]="email"
-        placeholder="Enter your email"
+        type="text"
+        id="username"
+        name="username"
+        [(ngModel)]="username"
+        placeholder="Enter your username"
         required>
     </div>
 
@@ -29,7 +29,10 @@
       {{ errorMessage }}
     </div>
 
-    <button class="login-button" (click)="login()">Login</button>
+    <button class="login-button" (click)="login()" [disabled]="isLoading">
+      <span *ngIf="!isLoading">Login</span>
+      <span *ngIf="isLoading">Logging in...</span>
+    </button>
 
     <div class="signup-link">
       Don't have an account?

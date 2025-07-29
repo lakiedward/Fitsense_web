@@ -27,33 +27,33 @@ interface WorkoutData {
   selector: 'app-workout-execution',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './workout-execution.component.html',
-  styleUrls: ['./workout-execution.component.css']
+  templateUrl: '../workout-execution.component.html',
+  styleUrls: ['../workout-execution.component.css']
 })
 export class WorkoutExecutionComponent implements OnInit, OnDestroy {
   workoutId: string | null = null;
   workout: WorkoutData | null = null;
-  
+
   // Workout execution state
   isStarted: boolean = false;
   isPaused: boolean = false;
   currentStepIndex: number = 0;
   elapsedTime: number = 0; // in seconds
   stepElapsedTime: number = 0; // in seconds
-  
+
   // Metrics
   currentPower: number = 0; // in watts
   currentHeartRate: number = 0; // in bpm
   currentCadence: number = 0; // in rpm
-  
+
   // Timer subscription
   private timerSubscription: Subscription | null = null;
-  
+
   constructor(
     private route: ActivatedRoute,
     private router: Router
   ) {}
-  
+
   ngOnInit(): void {
     this.workoutId = this.route.snapshot.paramMap.get('id');
     if (this.workoutId) {
@@ -62,11 +62,11 @@ export class WorkoutExecutionComponent implements OnInit, OnDestroy {
       this.navigateBack();
     }
   }
-  
+
   ngOnDestroy(): void {
     this.stopTimer();
   }
-  
+
   loadWorkout(workoutId: string): void {
     // TODO: Implement with actual service
     // Simulate loading workout data
@@ -190,14 +190,14 @@ export class WorkoutExecutionComponent implements OnInit, OnDestroy {
           }
         ]
       };
-      
+
       // Simulate some metrics
       this.currentPower = 150;
       this.currentHeartRate = 120;
       this.currentCadence = 90;
     }, 500);
   }
-  
+
   startWorkout(): void {
     if (!this.isStarted) {
       this.isStarted = true;
@@ -205,34 +205,34 @@ export class WorkoutExecutionComponent implements OnInit, OnDestroy {
       this.startTimer();
     }
   }
-  
+
   pauseWorkout(): void {
     if (this.isStarted && !this.isPaused) {
       this.isPaused = true;
       this.stopTimer();
     }
   }
-  
+
   resumeWorkout(): void {
     if (this.isStarted && this.isPaused) {
       this.isPaused = false;
       this.startTimer();
     }
   }
-  
+
   stopWorkout(): void {
     if (this.isStarted) {
       this.isStarted = false;
       this.isPaused = false;
       this.stopTimer();
-      
+
       // Show confirmation dialog before navigating away
       if (confirm('Are you sure you want to end this workout?')) {
         this.navigateBack();
       }
     }
   }
-  
+
   skipStep(): void {
     if (this.isStarted && this.workout) {
       if (this.currentStepIndex < this.workout.steps.length - 1) {
@@ -241,17 +241,17 @@ export class WorkoutExecutionComponent implements OnInit, OnDestroy {
       }
     }
   }
-  
+
   private startTimer(): void {
     this.stopTimer(); // Ensure no existing timer
-    
+
     this.timerSubscription = interval(1000).subscribe(() => {
       this.elapsedTime++;
       this.stepElapsedTime++;
-      
+
       // Simulate changing metrics
       this.updateMetrics();
-      
+
       // Check if current step is complete
       const currentStep = this.getCurrentStep();
       if (this.workout && currentStep && this.stepElapsedTime >= currentStep.duration) {
@@ -266,14 +266,14 @@ export class WorkoutExecutionComponent implements OnInit, OnDestroy {
       }
     });
   }
-  
+
   private stopTimer(): void {
     if (this.timerSubscription) {
       this.timerSubscription.unsubscribe();
       this.timerSubscription = null;
     }
   }
-  
+
   private updateMetrics(): void {
     // Simulate changing metrics based on current step
     const currentStep = this.getCurrentStep();
@@ -283,14 +283,14 @@ export class WorkoutExecutionComponent implements OnInit, OnDestroy {
         const fluctuation = Math.random() * 20 - 10; // -10 to +10
         this.currentPower = Math.round(currentStep.targetPower + fluctuation);
       }
-      
+
       // Simulate heart rate changes (slower to respond)
       if (currentStep.targetHeartRate) {
         const currentDiff = currentStep.targetHeartRate - this.currentHeartRate;
         const change = currentDiff * 0.05; // 5% closer to target each second
         this.currentHeartRate = Math.round(this.currentHeartRate + change);
       }
-      
+
       // Simulate cadence fluctuations
       if (currentStep.targetCadence) {
         const fluctuation = Math.random() * 6 - 3; // -3 to +3
@@ -298,56 +298,56 @@ export class WorkoutExecutionComponent implements OnInit, OnDestroy {
       }
     }
   }
-  
+
   private completeWorkout(): void {
     this.stopTimer();
     this.isStarted = false;
-    
+
     // Show completion message
     alert('Workout completed! Great job!');
-    
+
     // Navigate back
     this.navigateBack();
   }
-  
+
   getCurrentStep(): WorkoutStep | undefined {
     return this.workout?.steps[this.currentStepIndex];
   }
-  
+
   getStepProgress(): number {
     const currentStep = this.getCurrentStep();
     if (!currentStep) return 0;
-    
+
     return (this.stepElapsedTime / currentStep.duration) * 100;
   }
-  
+
   getWorkoutProgress(): number {
     if (!this.workout) return 0;
-    
+
     return (this.elapsedTime / this.workout.totalDuration) * 100;
   }
-  
+
   formatTime(seconds: number): string {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   }
-  
+
   getStepTimeRemaining(): string {
     const currentStep = this.getCurrentStep();
     if (!currentStep) return '00:00';
-    
+
     const remaining = currentStep.duration - this.stepElapsedTime;
     return this.formatTime(Math.max(0, remaining));
   }
-  
+
   getWorkoutTimeRemaining(): string {
     if (!this.workout) return '00:00';
-    
+
     const remaining = this.workout.totalDuration - this.elapsedTime;
     return this.formatTime(Math.max(0, remaining));
   }
-  
+
   getStepTypeClass(type: string): string {
     switch (type) {
       case 'warmup': return 'warmup';
@@ -357,7 +357,7 @@ export class WorkoutExecutionComponent implements OnInit, OnDestroy {
       default: return '';
     }
   }
-  
+
   navigateBack(): void {
     this.router.navigate(['/workout/plans']);
   }

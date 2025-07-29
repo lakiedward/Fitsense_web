@@ -2,6 +2,8 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { AuthService } from '../../core/services/api/auth.service';
+import { User } from '../../core/models/user.model';
 
 @Component({
   selector: 'app-login',
@@ -11,21 +13,40 @@ import { Router } from '@angular/router';
   styleUrls: ['./login.component.css']
 })
 export class LoginComponent {
-  email: string = '';
+  username: string = '';
   password: string = '';
   errorMessage: string = '';
+  isLoading: boolean = false;
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private authService: AuthService
+  ) {}
 
   login() {
-    // TODO: Implement actual authentication logic with a service
-    if (this.email && this.password) {
-      console.log('Login attempt with:', this.email);
-      // Simulate successful login
-      localStorage.setItem('isLoggedIn', 'true');
-      this.router.navigate(['/home']);
+    if (this.username && this.password) {
+      this.isLoading = true;
+      this.errorMessage = '';
+
+      const user: User = {
+        username: this.username,
+        password: this.password
+      };
+
+      this.authService.login(user).subscribe({
+        next: (response) => {
+          console.log('Login successful');
+          this.isLoading = false;
+          this.router.navigate(['/home']);
+        },
+        error: (error) => {
+          console.error('Login error:', error);
+          this.isLoading = false;
+          this.errorMessage = error.error?.detail || 'Login failed. Please check your credentials.';
+        }
+      });
     } else {
-      this.errorMessage = 'Please enter both email and password';
+      this.errorMessage = 'Please enter both username and password';
     }
   }
 

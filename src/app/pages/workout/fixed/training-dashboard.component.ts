@@ -26,8 +26,8 @@ interface ScheduledWorkout {
   selector: 'app-training-dashboard',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './training-dashboard.component.html',
-  styleUrls: ['./training-dashboard.component.css']
+  templateUrl: '../training-dashboard.component.html',
+  styleUrls: ['../training-dashboard.component.css']
 })
 export class TrainingDashboardComponent implements OnInit {
   activePlans: TrainingPlan[] = [];
@@ -152,7 +152,7 @@ export class TrainingDashboardComponent implements OnInit {
   navigateBack(): void {
     this.router.navigate(['/home']);
   }
-  
+
   // Add the missing navigateTo method
   navigateTo(route: string): void {
     this.router.navigate([route]);

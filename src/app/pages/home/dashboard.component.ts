@@ -1,15 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-
-interface WorkoutSummary {
-  id: string;
-  title: string;
-  type: string;
-  duration: number; // in minutes
-  scheduledTime?: string;
-  completed: boolean;
-}
+import { UserService } from '../../core/services/api/user.service';
+import { TrainingService } from '../../core/services/api/training.service';
+import { HealthConnectService } from '../../core/services/api/health-connect.service';
+import { AuthService } from '../../core/services/api/auth.service';
+import { WorkoutSummary } from '../../core/models/training.model';
+import { HealthConnectActivity } from '../../core/models/health-connect.model';
 
 interface MetricSummary {
   label: string;
@@ -29,6 +26,8 @@ interface MetricSummary {
 export class DashboardComponent implements OnInit {
   userName: string = 'Athlete';
   todaysDate: Date = new Date();
+  isLoading: boolean = true;
+  errorMessage: string = '';
 
   // Today's workout
   todaysWorkout: WorkoutSummary | null = null;
@@ -41,75 +40,113 @@ export class DashboardComponent implements OnInit {
   ];
 
   // Metrics
-  metrics: MetricSummary[] = [
-    { label: 'Sleep', value: 7.5, unit: 'hrs', icon: 'bedtime', change: 5 },
-    { label: 'Steps', value: 8432, icon: 'directions_walk', change: -2 },
-    { label: 'Calories', value: '1850/2200', icon: 'local_fire_department', change: 3 },
-    { label: 'FTP', value: 245, unit: 'W', icon: 'speed', change: 8 }
-  ];
+  metrics: MetricSummary[] = [];
 
   // Recent activities
-  recentActivities: WorkoutSummary[] = [];
+  recentActivities: HealthConnectActivity[] = [];
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private userService: UserService,
+    private trainingService: TrainingService,
+    private healthConnectService: HealthConnectService,
+    private authService: AuthService
+  ) {}
 
   ngOnInit(): void {
+    this.isLoading = true;
     this.loadUserData();
     this.loadTodaysWorkout();
     this.loadRecentActivities();
+    this.loadMetrics();
   }
 
   loadUserData(): void {
-    // TODO: Implement with actual service
-    // Simulate loading user data
-    setTimeout(() => {
-      this.userName = 'John';
-    }, 500);
+    this.userService.getUserTrainingData().subscribe({
+      next: (data) => {
+        this.userName = data.name || 'Athlete';
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Error loading user data:', error);
+        this.errorMessage = 'Failed to load user data';
+        this.isLoading = false;
+      }
+    });
   }
 
   loadTodaysWorkout(): void {
-    // TODO: Implement with actual service
-    // Simulate loading today's workout
-    setTimeout(() => {
-      this.todaysWorkout = {
-        id: 'w1',
-        title: 'Threshold Intervals',
-        type: 'Cycling',
-        duration: 60,
-        scheduledTime: '18:00',
-        completed: false
-      };
-    }, 500);
+    const today = new Date().toISOString().split('T')[0]; // Format: YYYY-MM-DD
+
+    this.trainingService.getTrainingPlan().subscribe({
+      next: (plans) => {
+        // Find today's workout
+        const todaysPlan = plans.find(plan => plan.date === today);
+
+        if (todaysPlan) {
+          this.todaysWorkout = {
+            id: todaysPlan.id.toString(),
+            title: todaysPlan.title,
+            type: todaysPlan.type,
+            duration: todaysPlan.duration,
+            scheduledTime: todaysPlan.scheduledTime,
+            completed: todaysPlan.completed
+          };
+        }
+      },
+      error: (error) => {
+        console.error('Error loading today\'s workout:', error);
+      }
+    });
   }
 
   loadRecentActivities(): void {
-    // TODO: Implement with actual service
-    // Simulate loading recent activities
-    setTimeout(() => {
-      this.recentActivities = [
-        {
-          id: 'a1',
-          title: 'Morning Run',
-          type: 'Running',
-          duration: 45,
-          completed: true
-        },
-        {
-          id: 'a2',
-          title: 'Strength Training',
-          type: 'Strength',
-          duration: 30,
-          completed: true
-        },
-        {
-          id: 'a3',
-          title: 'Recovery Ride',
-          type: 'Cycling',
-          duration: 90,
-          completed: true
-        }
-      ];
-    }, 500);
+    this.healthConnectService.getActivities(1, 3).subscribe({
+      next: (activities) => {
+        this.recentActivities = activities;
+      },
+      error: (error) => {
+        console.error('Error loading recent activities:', error);
+      }
+    });
+  }
+
+  loadMetrics(): void {
+    // Get health stats
+    this.healthConnectService.getStats().subscribe({
+      next: (stats) => {
+        this.metrics = [
+          {
+            label: 'Activities',
+            value: stats.total_activities,
+            icon: 'fitness_center',
+            change: 0
+          },
+          {
+            label: 'Distance',
+            value: Math.round(stats.total_distance / 1000 * 10) / 10,
+            unit: 'km',
+            icon: 'straighten',
+            change: 0
+          },
+          {
+            label: 'Calories',
+            value: stats.total_calories,
+            icon: 'local_fire_department',
+            change: 0
+          }
+        ];
+      },
+      error: (error) => {
+        console.error('Error loading health stats:', error);
+        // Use default metrics if stats can't be loaded
+        this.metrics = [
+          { label: 'Sleep', value: 7.5, unit: 'hrs', icon: 'bedtime', change: 0 },
+          { label: 'Steps', value: 0, icon: 'directions_walk', change: 0 },
+          { label: 'Calories', value: '0/0', icon: 'local_fire_department', change: 0 }
+        ];
+      }
+    });
   }
 
   startWorkout(): void {
@@ -141,8 +178,7 @@ export class DashboardComponent implements OnInit {
   }
 
   logout(): void {
-    // TODO: Implement with actual auth service
-    localStorage.removeItem('isLoggedIn');
+    this.authService.logout();
     this.router.navigate(['/login']);
   }
 }

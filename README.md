@@ -1,6 +1,10 @@
-# Fitsense
+# FitSense Angular Web Application
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.1.3.
+
+## Related Projects
+- **Backend API**: Located at `/home/laki-edward/PycharmProjects/Fitness_app/`
+- **Android App**: Located at `/home/laki-edward/StudioProjects/FitnessApp/`
 
 ## Development server
 
