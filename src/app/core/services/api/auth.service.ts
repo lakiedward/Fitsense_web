@@ -18,8 +18,17 @@ export class AuthService extends ApiService {
     return this.post<AuthResponse>('users/token', user).pipe(
       tap(response => {
         localStorage.setItem('authToken', response.access_token);
-        localStorage.setItem('tokenType', response.token_type);
+        // Ensure token type is properly capitalized
+        const tokenType = response.token_type || 'bearer';
+        localStorage.setItem('tokenType', tokenType.charAt(0).toUpperCase() + tokenType.slice(1).toLowerCase());
         localStorage.setItem('isLoggedIn', 'true');
+        
+        // Debug logging
+        console.log('=== AUTH SERVICE DEBUG ===');
+        console.log('Token saved:', response.access_token?.substring(0, 20) + '...');
+        console.log('Token type saved:', localStorage.getItem('tokenType'));
+        console.log('Is logged in set to:', localStorage.getItem('isLoggedIn'));
+        console.log('=== END AUTH SERVICE DEBUG ===');
       })
     );
   }
@@ -59,7 +68,7 @@ export class AuthService extends ApiService {
   }
 
   /**
-   * Gets the token type (usually 'bearer')
+   * Gets the token type (usually 'Bearer')
    * @returns The token type or null if not logged in
    */
   getTokenType(): string | null {

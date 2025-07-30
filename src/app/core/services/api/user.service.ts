@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { ApiService } from './api.service';
 import { AuthService } from './auth.service';
-import { UserDetails, UserWeekAvailability, UserTrainingData } from '../../models/user-details.model';
+import { UserDetails, UserWeekAvailability, UserTrainingData, TrainingUserDetails } from '../../models/user-details.model';
 
 @Injectable({
   providedIn: 'root'
@@ -23,6 +23,20 @@ export class UserService extends ApiService {
    * @returns Observable with the response
    */
   addUserDetails(details: UserDetails): Observable<{ message: string }> {
+    const authHeader = this.authService.getAuthorizationHeader();
+    if (!authHeader) {
+      throw new Error('User not authenticated');
+    }
+
+    return this.post<{ message: string }>('training/add_user_details', details);
+  }
+
+  /**
+   * Adds user training details (matches backend DetaliiUser model)
+   * @param details Training user details to add/update
+   * @returns Observable with the response
+   */
+  addTrainingUserDetails(details: TrainingUserDetails): Observable<{ message: string }> {
     const authHeader = this.authService.getAuthorizationHeader();
     if (!authHeader) {
       throw new Error('User not authenticated');
@@ -98,5 +112,19 @@ export class UserService extends ApiService {
     }
 
     return this.post<void>('sports/select', sportsRequest);
+  }
+
+  /**
+   * Saves user's swimming pace data
+   * @param swimmingData Swimming pace data to save
+   * @returns Observable with the response
+   */
+  saveSwimmingData(swimmingData: { predictions: Array<{ distance_m: number; time: number }> }): Observable<{ message: string }> {
+    const authHeader = this.authService.getAuthorizationHeader();
+    if (!authHeader) {
+      throw new Error('User not authenticated');
+    }
+
+    return this.post<{ message: string }>('swim/best-time-prediction/manual', swimmingData);
   }
 }

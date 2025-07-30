@@ -25,3 +25,11 @@ export interface UserTrainingData {
   ftpRunning?: number;
   swimPace?: number;
 }
+
+export interface TrainingUserDetails {
+  varsta: number;      // age
+  inaltime: number;    // height
+  greutate: number;    // weight
+  gender: string;      // gender
+  discipline: string;  // discipline/sport
+}

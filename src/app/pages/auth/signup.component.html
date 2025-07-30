@@ -1,4 +1,12 @@
 <div class="signup-container">
+  <!-- Loading Overlay -->
+  <div *ngIf="isLoading" class="loading-overlay">
+    <div class="loading-card">
+      <div class="spinner"></div>
+      <p>{{ loadingMessage }}</p>
+    </div>
+  </div>
+
   <div class="signup-card">
     <h1>FitSense</h1>
     <h2>Create Account</h2>
@@ -72,11 +80,12 @@
       </div>
     </div>
 
-    <!-- Step 3: Age Input -->
+    <!-- Step 3: Physical Details (Age, Weight, Height) -->
     <div *ngIf="currentStep === 3" class="step-content">
-      <h3>How old are you?</h3>
+      <h3>Your Physical Details</h3>
 
       <div class="form-group">
+        <label for="age">Age</label>
         <input
           type="number"
           id="age"
@@ -87,10 +96,103 @@
           placeholder="Enter your age"
           required>
       </div>
+
+      <div class="form-group">
+        <label for="weight">Weight</label>
+        <div class="unit-toggle-container">
+          <div class="unit-toggle">
+            <div
+              class="unit-option"
+              [class.selected]="signupData.weightUnit === 'kg'"
+              (click)="toggleWeightUnit('kg')">
+              Kg
+            </div>
+            <div
+              class="unit-option"
+              [class.selected]="signupData.weightUnit === 'lb'"
+              (click)="toggleWeightUnit('lb')">
+              Lb
+            </div>
+          </div>
+        </div>
+        <input
+          type="number"
+          id="weight"
+          name="weight"
+          [(ngModel)]="signupData.weight"
+          [placeholder]="'Enter your weight (' + signupData.weightUnit + ')'"
+          step="0.1"
+          required>
+      </div>
+
+      <div class="form-group">
+        <label for="height">Height</label>
+        <div class="unit-toggle-container">
+          <div class="unit-toggle">
+            <div
+              class="unit-option"
+              [class.selected]="signupData.heightUnit === 'cm'"
+              (click)="toggleHeightUnit('cm')">
+              Cm
+            </div>
+            <div
+              class="unit-option"
+              [class.selected]="signupData.heightUnit === 'ft'"
+              (click)="toggleHeightUnit('ft')">
+              Ft
+            </div>
+          </div>
+        </div>
+        <input
+          type="number"
+          id="height"
+          name="height"
+          [(ngModel)]="signupData.height"
+          [placeholder]="'Enter your height (' + signupData.heightUnit + ')'"
+          step="0.1"
+          required>
+      </div>
     </div>
 
-    <!-- Step 4: Sports Selection -->
+    <!-- Step 4: Strava Integration -->
     <div *ngIf="currentStep === 4" class="step-content">
+      <h3>Connect with Strava</h3>
+      <p class="subtitle">Sync your activities and get personalized training plans</p>
+
+      <div class="strava-card">
+        <div class="strava-logo">
+          <img src="assets/strava-logo.png" alt="Strava Logo" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/Strava_Logo.svg/1200px-Strava_Logo.svg.png'; this.onerror=null;">
+        </div>
+
+        <p class="strava-description">
+          Connect your Strava account to automatically sync your activities and get more accurate training recommendations.
+        </p>
+
+        <button
+          class="strava-button"
+          (click)="connectStrava()"
+          [disabled]="isLoading">
+          <span *ngIf="!isLoading">Connect with Strava</span>
+          <span *ngIf="isLoading">{{ loadingMessage }}</span>
+        </button>
+
+        <p class="skip-text">
+          <a (click)="nextStep()">Skip this step</a>
+        </p>
+      </div>
+
+      <div *ngIf="signupData.stravaConnected" class="strava-connected">
+        <div class="success-icon">✓</div>
+        <p>Successfully connected to Strava!</p>
+        <div class="button-group">
+          <button class="primary-button" (click)="nextStep()">Continue</button>
+          <button class="secondary-button" (click)="disconnectStrava()">Disconnect</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 5: Sports Selection -->
+    <div *ngIf="currentStep === 5" class="step-content">
       <h3>What sports do you do?</h3>
       <p class="subtitle">Select all that apply</p>
 
@@ -105,8 +207,8 @@
       </div>
     </div>
 
-    <!-- Step 5: Training Metrics -->
-    <div *ngIf="currentStep === 5" class="step-content">
+    <!-- Step 6: Training Metrics -->
+    <div *ngIf="currentStep === 6" class="step-content">
       <h3>Training Metrics</h3>
 
       <div *ngIf="signupData.sports.includes('Cycling')" class="form-group">
@@ -145,8 +247,8 @@
       </div>
     </div>
 
-    <!-- Step 6: Plan Length -->
-    <div *ngIf="currentStep === 6" class="step-content">
+    <!-- Step 7: Plan Length -->
+    <div *ngIf="currentStep === 7" class="step-content">
       <h3>Training Plan Length</h3>
       <p class="subtitle">How many weeks would you like your training plan to be?</p>
 
@@ -174,8 +276,8 @@
       </div>
     </div>
 
-    <!-- Step 7: Review -->
-    <div *ngIf="currentStep === 7" class="step-content">
+    <!-- Step 8: Review -->
+    <div *ngIf="currentStep === 8" class="step-content">
       <h3>Review Your Information</h3>
 
       <div class="review-item">
@@ -191,6 +293,21 @@
       <div class="review-item">
         <div class="review-label">Age:</div>
         <div class="review-value">{{ signupData.age }}</div>
+      </div>
+
+      <div class="review-item">
+        <div class="review-label">Weight:</div>
+        <div class="review-value">{{ signupData.weight }} {{ signupData.weightUnit }}</div>
+      </div>
+
+      <div class="review-item">
+        <div class="review-label">Height:</div>
+        <div class="review-value">{{ signupData.height }} {{ signupData.heightUnit }}</div>
+      </div>
+
+      <div class="review-item">
+        <div class="review-label">Strava:</div>
+        <div class="review-value">{{ signupData.stravaConnected ? 'Connected' : 'Not connected' }}</div>
       </div>
 
       <div class="review-item">
