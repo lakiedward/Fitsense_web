@@ -28,12 +28,27 @@ import { firstValueFrom } from 'rxjs';
           <button
             class="connect-btn"
             (click)="connectToStrava()"
-            [disabled]="isLoading">
+            [disabled]="isLoading"
+            *ngIf="!errorMessage">
             <span *ngIf="isLoading" class="spinner"></span>
             {{ isLoading ? 'Connecting...' : 'Connect to Strava' }}
           </button>
-          <div class="error-message" *ngIf="errorMessage">
-            {{ errorMessage }}
+
+          <!-- Error state with retry button -->
+          <div class="error-section" *ngIf="errorMessage">
+            <div class="error-message">
+              <span class="error-icon">⚠️</span>
+              {{ errorMessage }}
+            </div>
+            <div class="error-actions">
+              <button class="retry-btn" (click)="retryStravaConnection()" [disabled]="isLoading">
+                <span *ngIf="isLoading" class="spinner"></span>
+                {{ isLoading ? 'Connecting...' : 'Try Again' }}
+              </button>
+            </div>
+            <p class="error-help" *ngIf="errorMessage.includes('Popup was blocked')">
+              💡 <strong>Tip:</strong> Please allow popups for this site in your browser settings and try again.
+            </p>
           </div>
         </div>
       </div>
@@ -409,55 +424,32 @@ export class StravaDashboardComponent implements OnInit {
       this.isLoading = true;
       this.errorMessage = '';
 
-      const response = await firstValueFrom(this.stravaService.connectStrava());
+      // Use the centralized OAuth service
+      const result = await this.stravaService.initiateStravaConnect();
 
-      if (response.auth_url) {
-        // Open Strava authorization in a new window
-        const authWindow = window.open(
-          response.auth_url,
-          'strava-auth',
-          'width=600,height=700,scrollbars=yes,resizable=yes'
-        );
+      if (result.success) {
+        this.isConnected = true;
+        this.isLoading = false;
 
-        // Listen for the callback
-        const messageListener = (event: MessageEvent) => {
-          if (event.origin !== window.location.origin) {
-            return;
-          }
-
-          if (event.data.type === 'STRAVA_AUTH_SUCCESS') {
-            this.isConnected = true;
-            this.isLoading = false;
-            authWindow?.close();
-            window.removeEventListener('message', messageListener);
-            this.loadAthleteData();
-            this.loadRecentActivities();
-          } else if (event.data.type === 'STRAVA_AUTH_ERROR') {
-            this.errorMessage = event.data.error || 'Failed to connect to Strava';
-            this.isLoading = false;
-            authWindow?.close();
-            window.removeEventListener('message', messageListener);
-          }
-        };
-
-        window.addEventListener('message', messageListener);
-
-        // Check if the window was closed manually
-        const checkClosed = setInterval(() => {
-          if (authWindow?.closed) {
-            clearInterval(checkClosed);
-            window.removeEventListener('message', messageListener);
-            this.isLoading = false;
-          }
-        }, 1000);
-
+        // Load data in parallel for better performance
+        await Promise.all([
+          this.loadAthleteData(),
+          this.loadRecentActivities()
+        ]);
       } else {
-        throw new Error('No authorization URL received');
+        this.errorMessage = result.error || 'Failed to connect to Strava';
+        this.isLoading = false;
       }
     } catch (error: any) {
+      console.error('Strava connection error:', error);
       this.errorMessage = error.message || 'Failed to connect to Strava';
       this.isLoading = false;
     }
+  }
+
+  // Retry connection method for better UX
+  retryStravaConnection() {
+    this.connectToStrava();
   }
 
   async disconnectFromStrava() {

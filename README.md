@@ -3,8 +3,8 @@
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.1.3.
 
 ## Related Projects
-- **Backend API**: Located at `/home/laki-edward/PycharmProjects/Fitness_app/`
-- **Android App**: Located at `/home/laki-edward/StudioProjects/FitnessApp/`
+- **Backend API**: Located at `laki-edward@laki-edward-Precision-Tower-7910:~/PycharmProjects/Fitness_app$`
+- **Android App**: Located at `laki-edward@laki-edward-Precision-Tower-7910:~/StudioProjects/FitnessApp$`
 
 ## Development server
 

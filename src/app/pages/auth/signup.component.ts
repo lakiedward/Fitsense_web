@@ -57,6 +57,8 @@ export class SignupComponent {
   errorMessage: string = '';
   isLoading: boolean = false;
   loadingMessage: string = '';
+  loadingTime: number = 0;
+  private loadingTimer: any = null;
   availableSports: string[] = ['Cycling', 'Running', 'Swimming', 'Strength Training', 'Yoga'];
 
   constructor(
@@ -182,61 +184,57 @@ export class SignupComponent {
       this.isLoading = true;
       this.loadingMessage = 'Connecting to Strava...';
       this.errorMessage = '';
+      this.loadingTime = 0;
 
-      // Get the authorization URL from the backend
-      const response = await firstValueFrom(this.stravaService.connectStrava());
+      // Start loading timer for progress indicators
+      this.startLoadingTimer();
 
-      if (response.auth_url) {
-        // Open Strava authorization in a new window
-        const authWindow = window.open(
-          response.auth_url,
-          'strava-auth',
-          'width=600,height=700,scrollbars=yes,resizable=yes'
-        );
+      // Use the centralized OAuth service
+      const result = await this.stravaService.initiateStravaConnect();
 
-        // Listen for the callback
-        const messageListener = (event: MessageEvent) => {
-          if (event.origin !== window.location.origin) {
-            return;
-          }
+      if (result.success) {
+        this.signupData.stravaConnected = true;
+        this.loadingMessage = 'Successfully connected to Strava!';
 
-          if (event.data.type === 'STRAVA_AUTH_SUCCESS') {
-            // Handle successful authentication
-            this.signupData.stravaConnected = true;
-            this.isLoading = false;
-            this.loadingMessage = '';
-            authWindow?.close();
-            window.removeEventListener('message', messageListener);
-          } else if (event.data.type === 'STRAVA_AUTH_ERROR') {
-            // Handle authentication error
-            this.errorMessage = event.data.error || 'Failed to connect to Strava';
-            this.isLoading = false;
-            this.loadingMessage = '';
-            authWindow?.close();
-            window.removeEventListener('message', messageListener);
-          }
-        };
-
-        window.addEventListener('message', messageListener);
-
-        // Check if the window was closed manually
-        const checkClosed = setInterval(() => {
-          if (authWindow?.closed) {
-            clearInterval(checkClosed);
-            window.removeEventListener('message', messageListener);
-            this.isLoading = false;
-            this.loadingMessage = '';
-          }
-        }, 1000);
-
+        // Keep success message visible for a moment
+        setTimeout(() => {
+          this.stopLoadingTimer();
+          this.isLoading = false;
+          this.loadingMessage = '';
+        }, 1500);
       } else {
-        throw new Error('No authorization URL received');
+        this.errorMessage = result.error || 'Failed to connect to Strava';
+        this.stopLoadingTimer();
+        this.isLoading = false;
+        this.loadingMessage = '';
       }
     } catch (error: any) {
+      console.error('Strava connection error:', error);
       this.errorMessage = error.message || 'Failed to connect to Strava';
+      this.stopLoadingTimer();
       this.isLoading = false;
       this.loadingMessage = '';
     }
+  }
+
+  private startLoadingTimer() {
+    this.loadingTime = 0;
+    this.loadingTimer = setInterval(() => {
+      this.loadingTime++;
+    }, 1000);
+  }
+
+  private stopLoadingTimer() {
+    if (this.loadingTimer) {
+      clearInterval(this.loadingTimer);
+      this.loadingTimer = null;
+    }
+    this.loadingTime = 0;
+  }
+
+  // Retry connection method for better UX
+  retryStravaConnection() {
+    this.connectStrava();
   }
 
   disconnectStrava() {

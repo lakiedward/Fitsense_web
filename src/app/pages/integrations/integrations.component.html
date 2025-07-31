@@ -1,0 +1,75 @@
+<div class="integrations-container">
+  <!-- Loading Indicator -->
+  <div *ngIf="isLoading" class="loading-overlay">
+    <div class="loading-spinner"></div>
+    <p>Loading integrations...</p>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="errorMessage" class="error-container">
+    <p class="error-message">{{ errorMessage }}</p>
+    <button class="primary-button" (click)="ngOnInit()">Retry</button>
+  </div>
+
+  <!-- Header -->
+  <header class="integrations-header">
+    <button class="back-button" (click)="goBack()">
+      <span class="material-icons">arrow_back</span>
+    </button>
+    <h1>App Integrations</h1>
+  </header>
+
+  <!-- Main content -->
+  <main class="integrations-content" [class.hidden]="isLoading">
+    <p class="intro-text">
+      Connect FitSense with your favorite fitness apps and devices to sync your activities and health data.
+    </p>
+
+    <!-- Integrations List -->
+    <div class="integrations-list">
+      <div *ngFor="let integration of integrations" class="integration-card" (click)="connectToService(integration)">
+        <div class="integration-logo" *ngIf="integration.logoSrc">
+          <img [src]="integration.logoSrc" [alt]="integration.title">
+        </div>
+        <div class="integration-icon" *ngIf="!integration.logoSrc">
+          <span class="material-icons">{{ integration.icon }}</span>
+        </div>
+        <div class="integration-info">
+          <div class="integration-header">
+            <h3 class="integration-title">{{ integration.title }}</h3>
+            <div class="connection-status" [class.connected]="integration.isConnected">
+              {{ integration.isConnected ? 'Connected' : 'Not Connected' }}
+            </div>
+          </div>
+          <p class="integration-description">{{ integration.description }}</p>
+        </div>
+        <div class="integration-action">
+          <button class="action-button" [class.connected]="integration.isConnected">
+            <span class="material-icons">{{ integration.isConnected ? 'settings' : 'add_circle' }}</span>
+            {{ integration.isConnected ? 'Manage' : 'Connect' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Navigation Footer -->
+  <nav class="bottom-nav">
+    <div class="nav-item" (click)="navigateTo('/home')">
+      <span class="material-icons">home</span>
+      <span class="nav-label">Home</span>
+    </div>
+    <div class="nav-item" (click)="navigateTo('/workout/plans')">
+      <span class="material-icons">fitness_center</span>
+      <span class="nav-label">Workouts</span>
+    </div>
+    <div class="nav-item" (click)="navigateTo('/calendar')">
+      <span class="material-icons">calendar_today</span>
+      <span class="nav-label">Calendar</span>
+    </div>
+    <div class="nav-item active">
+      <span class="material-icons">more_horiz</span>
+      <span class="nav-label">More</span>
+    </div>
+  </nav>
+</div>

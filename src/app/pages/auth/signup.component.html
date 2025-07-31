@@ -1,9 +1,22 @@
 <div class="signup-container">
+  <!-- Mountain Theme Clouds -->
+  <div class="cloud"></div>
+  <div class="cloud"></div>
+  <div class="cloud"></div>
+
   <!-- Loading Overlay -->
   <div *ngIf="isLoading" class="loading-overlay">
     <div class="loading-card">
       <div class="spinner"></div>
       <p>{{ loadingMessage }}</p>
+      <p *ngIf="loadingTime > 10" class="loading-patience">This may take a moment...</p>
+      <div *ngIf="loadingTime > 5" class="loading-progress">
+        <div class="progress-dots">
+          <span class="dot"></span>
+          <span class="dot"></span>
+          <span class="dot"></span>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -171,12 +184,29 @@
         <button
           class="strava-button"
           (click)="connectStrava()"
-          [disabled]="isLoading">
+          [disabled]="isLoading"
+          *ngIf="!errorMessage">
           <span *ngIf="!isLoading">Connect with Strava</span>
           <span *ngIf="isLoading">{{ loadingMessage }}</span>
         </button>
 
-        <p class="skip-text">
+        <!-- Error state with retry button -->
+        <div *ngIf="errorMessage && !signupData.stravaConnected" class="strava-error">
+          <div class="error-icon">⚠️</div>
+          <p class="error-text">{{ errorMessage }}</p>
+          <div class="error-actions">
+            <button class="retry-button" (click)="retryStravaConnection()" [disabled]="isLoading">
+              <span *ngIf="!isLoading">Try Again</span>
+              <span *ngIf="isLoading">{{ loadingMessage }}</span>
+            </button>
+            <button class="skip-button" (click)="nextStep()">Skip for Now</button>
+          </div>
+          <p class="error-help" *ngIf="errorMessage.includes('Popup was blocked')">
+            💡 <strong>Tip:</strong> Please allow popups for this site in your browser settings and try again.
+          </p>
+        </div>
+
+        <p class="skip-text" *ngIf="!errorMessage">
           <a (click)="nextStep()">Skip this step</a>
         </p>
       </div>
