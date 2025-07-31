@@ -22,6 +22,7 @@
     <div class="loading-card">
       <div class="spinner"></div>
       <p>Logging in...</p>
+      <p *ngIf="loadingTip" class="loading-tip">{{ loadingTip }}</p>
     </div>
   </div>
 
@@ -75,7 +76,8 @@
             <div *ngIf="getErrorMessage('email')" 
                  id="email-error" 
                  class="field-error" 
-                 role="alert">
+                 role="alert"
+                 aria-live="assertive">
               {{ getErrorMessage('email') }}
             </div>
           </div>
@@ -111,7 +113,8 @@
             <div *ngIf="getErrorMessage('password')" 
                  id="password-error" 
                  class="field-error" 
-                 role="alert">
+                 role="alert"
+                 aria-live="assertive">
               {{ getErrorMessage('password') }}
             </div>
             

@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { AuthService } from '../../core/services/api/auth.service';
+import { ThemeService } from '../../core/services/theme.service';
 
 @Component({
   selector: 'app-login',
@@ -24,6 +25,7 @@ export class LoginComponent implements OnInit {
   isDarkMode: boolean = false;
   isLowLightMode: boolean = false;
   rememberMe: boolean = false;
+  loadingTip: string = '';
   
   // Error states
   generalError: string = '';
@@ -39,14 +41,16 @@ export class LoginComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private themeService: ThemeService
   ) {}
 
   ngOnInit(): void {
     this.initForm();
     this.checkBiometricSupport();
     this.checkExistingAuth();
-    this.initTheme();
+    this.loadRememberMePreference();
+    this.initThemeFromService();
   }
 
   ngAfterViewInit(): void {
@@ -114,53 +118,23 @@ export class LoginComponent implements OnInit {
     }
   }
 
-  private initTheme(): void {
-    // Check for saved theme preference or default to light mode
-    const savedTheme = localStorage.getItem('theme');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    
-    if (savedTheme === 'low-light') {
-      this.isLowLightMode = true;
-      this.isDarkMode = false;
-    } else if (savedTheme === 'dark') {
-      this.isDarkMode = true;
-      this.isLowLightMode = false;
-    } else {
-      this.isDarkMode = (!savedTheme && prefersDark);
-      this.isLowLightMode = false;
-    }
-    
-    this.applyTheme();
+  private loadRememberMePreference(): void {
+    // Load remember me preference from auth service
+    this.rememberMe = this.authService.getRememberMe();
   }
 
-  private applyTheme(): void {
-    // Remove all theme classes first
-    document.body.classList.remove('dark-mode', 'low-light');
-    
-    if (this.isLowLightMode) {
-      document.body.classList.add('low-light');
-    } else if (this.isDarkMode) {
-      document.body.classList.add('dark-mode');
-    }
+  private initThemeFromService(): void {
+    // Subscribe to theme changes
+    this.themeService.currentTheme$.subscribe(theme => {
+      this.isDarkMode = theme === 'dark';
+      this.isLowLightMode = theme === 'low-light';
+    });
   }
+
+  // Theme application is now handled by ThemeService
 
   toggleTheme(): void {
-    // Cycle through: light -> dark -> low-light -> light
-    if (!this.isDarkMode && !this.isLowLightMode) {
-      this.isDarkMode = true;
-      this.isLowLightMode = false;
-      localStorage.setItem('theme', 'dark');
-    } else if (this.isDarkMode && !this.isLowLightMode) {
-      this.isDarkMode = false;
-      this.isLowLightMode = true;
-      localStorage.setItem('theme', 'low-light');
-    } else {
-      this.isDarkMode = false;
-      this.isLowLightMode = false;
-      localStorage.setItem('theme', 'light');
-    }
-    
-    this.applyTheme();
+    this.themeService.toggleTheme();
   }
 
   private updatePasswordStrength(password: string): void {
@@ -258,6 +232,7 @@ export class LoginComponent implements OnInit {
 
     this.isLoading = true;
     this.clearErrors();
+    this.setLoadingTip();
 
     const formValue = this.loginForm.value;
     const user = {
@@ -265,15 +240,8 @@ export class LoginComponent implements OnInit {
       password: formValue.password
     };
 
-    this.authService.login(user).subscribe({
+    this.authService.login(user, this.rememberMe).subscribe({
       next: (response) => {
-        // Store remember me preference
-        if (this.rememberMe) {
-          localStorage.setItem('rememberMe', 'true');
-        } else {
-          localStorage.removeItem('rememberMe');
-        }
-        
         // Navigate to home page
         this.router.navigate(['/home']);
       },
@@ -302,6 +270,13 @@ export class LoginComponent implements OnInit {
     } else {
       this.generalError = 'Login failed. Please check your connection and try again.';
     }
+    
+    // Focus back to email input for better UX
+    setTimeout(() => {
+      if (this.emailInput) {
+        this.emailInput.nativeElement.focus();
+      }
+    }, 100);
   }
 
   // Social login methods
@@ -338,6 +313,21 @@ export class LoginComponent implements OnInit {
 
   goToForgotPassword(): void {
     this.generalError = 'Forgot password functionality is not yet implemented. Please contact support.';
+  }
+
+  private setLoadingTip(): void {
+    const tips = [
+      "💪 Every workout counts towards your goals!",
+      "🏃‍♂️ Consistency beats perfection every time.",
+      "🌟 You're one step closer to your fitness journey!",
+      "🔥 Small progress is still progress!",
+      "🎯 Focus on progress, not perfection.",
+      "💫 Your future self will thank you!",
+      "🚀 Every expert was once a beginner.",
+      "🌈 The only bad workout is the one that didn't happen."
+    ];
+    
+    this.loadingTip = tips[Math.floor(Math.random() * tips.length)];
   }
 
   // Keyboard support
